@@ -8,25 +8,28 @@ class BankAccount {
     this.transactions = [];
   }
   balance() {
-    const sumTransactions = this.transactions.reduce(
-      (acc, cur) => acc + cur,
-      0
-    );
-    return sumTransactions;
+    let sum = 0;
+    for (let i = 0; i < this.transactions.length; i++) {
+      sum += this.transactions[i].amount;
+    }
+    return sum;
+    // const sumTransactions = this.transactions;
+    // sumTransactions.reduce((acc, cur) => acc + cur.amount, 0);
+    // return sumTransactions;
   }
   deposit(amount) {
     if (amount > 0) {
       let depositTransaction = new Transaction(amount, 'Deposit');
-      this.transactions.push(depositTransaction.amount);
+      this.transactions.push(depositTransaction);
     }
   }
 
   charge(payee, amount) {
-    let balance = this.balance();
+    let currBalance = this.balance();
 
-    if (amount <= balance) {
-      let chargeTransaction = new Transaction(amount * -1, payee);
-      this.transactions.push(chargeTransaction.amount);
+    if (amount <= currBalance) {
+      let chargeTransaction = new Transaction(-amount, payee);
+      this.transactions.push(chargeTransaction);
     }
   }
 }
@@ -39,13 +42,15 @@ class Transaction {
   }
 }
 
-const myAccount = new BankAccount(123456, 'Stephen Lyssy');
-console.log(myAccount);
+// const myAccount = new BankAccount(123456, 'Stephen Lyssy');
+// console.log(myAccount);
 
-myAccount.deposit(100);
-console.log(myAccount);
-myAccount.charge('target', -50);
-console.log(myAccount);
+// myAccount.deposit(100);
+// console.log(myAccount);
+// myAccount.charge('target', 50);
+// console.log(myAccount.transactions[1].payee);
+// console.log(myAccount.balance());
+// console.log(myAccount.transactions);
 
 // # Start Test Section
 if (typeof describe === 'function') {
@@ -64,10 +69,10 @@ if (typeof describe === 'function') {
     it('should track transactions and update balance.', () => {
       let acct1 = new BankAccount('123456', 'James Doe');
       acct1.deposit(1000);
-      assert.equal(acct1.transactions[0], 1000);
+      assert.equal(acct1.transactions[0].amount, 1000);
       assert.equal(acct1.balance(), 1000);
       acct1.charge('Home Depot', 250);
-      assert.equal(acct1.transactions[1], -250);
+      assert.equal(acct1.transactions[1].amount, -250);
       assert.equal(acct1.balance(), 750);
     });
   });
@@ -110,13 +115,51 @@ if (typeof describe === 'function') {
     });
   });
 
-  describe('#Testing transaction creation', () => {
+  describe('#Testing transaction creation for withdrawals.', () => {
     it('Should create a transaction object correctly for a charge', () => {
       let t1 = new Transaction(-55.6, 'Home Depot');
       assert.equal(t1.amount, -55.6);
       assert.equal(t1.payee, 'Home Depot');
       assert.notEqual(t1.date, undefined);
       assert.notEqual(t1.date, null);
+    });
+  });
+
+  describe('Transactions and tests', () => {
+    let testAccount = new BankAccount('987456321', 'Tyler Joseph');
+    it('Should correctly create an account.', () => {
+      assert.equal(testAccount.owner, 'Tyler Joseph');
+      assert.equal(testAccount.accountNumber, '987456321');
+      assert.equal(testAccount.balance(), 0);
+    });
+
+    it('Should deposit money correctly.', () => {
+      testAccount.deposit(300);
+      testAccount.deposit(100);
+      testAccount.deposit(-25);
+      testAccount.deposit(100.25);
+      assert.equal(testAccount.transactions.length, 3);
+      assert.equal(testAccount.balance(), 500.25);
+      testAccount.charge('Zero Account', 500.25);
+      assert.equal(testAccount.balance(), 0);
+    });
+
+    it('Should charge money correctly.', () => {
+      testAccount.deposit(100000);
+      testAccount.charge('USAA', 3000.25); //96,999.75
+      assert.equal(testAccount.transactions[5].payee, 'USAA');
+      assert.equal(testAccount.transactions[5].amount, -3000.25);
+      testAccount.charge('Capital One', 10000); //86,999.75
+      testAccount.charge("Maria's Tacos", -25.45); //87,025.20
+      testAccount.charge('Exxon', 100); //86,925.20
+      assert.equal(testAccount.transactions.length, 9);
+      assert.equal(testAccount.balance(), 86925.2);
+    });
+
+    it('Should NOT allow overdrafts.', () => {
+      testAccount.charge('USAA', 130000.25);
+      assert.equal(testAccount.transactions.length, 9);
+      assert.equal(testAccount.balance(), 86925.2);
     });
   });
 }
