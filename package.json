@@ -1,0 +1,22 @@
+{
+  "name": "js211_bank_account",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --no-timeouts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Slyssy/JS211_Bank_Account.git"
+  },
+  "author": "Stephen Lyssy",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Slyssy/JS211_Bank_Account/issues"
+  },
+  "homepage": "https://github.com/Slyssy/JS211_Bank_Account#readme",
+  "dependencies": {
+    "mocha": "^10.0.0"
+  }
+}
