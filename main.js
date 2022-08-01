@@ -34,6 +34,22 @@ class BankAccount {
   }
 }
 
+class SavingsAccount extends BankAccount {
+  constructor(accountNumber, owner, interestRate) {
+    super(accountNumber, owner);
+    this.interestRate = interestRate;
+  }
+  accrueInterest() {
+    let balance = this.balance();
+    let interestAmount = balance * this.interestRate;
+    let interestTransaction = new Transaction(
+      interestAmount,
+      'Interest Payment'
+    );
+    this.transactions.push(interestTransaction);
+  }
+}
+
 class Transaction {
   constructor(amount, payee) {
     this.date = new Date();
@@ -160,6 +176,35 @@ if (typeof describe === 'function') {
       testAccount.charge('USAA', 130000.25);
       assert.equal(testAccount.transactions.length, 9);
       assert.equal(testAccount.balance(), 86925.2);
+    });
+  });
+
+  describe('Should track and allocate interest payments.', () => {
+    it('Create new savings account', () => {
+      let saving = new SavingsAccount('321456987', 'Francis Judge', 0.1);
+      assert.equal(saving.accountNumber, '321456987');
+      assert.equal(saving.owner, 'Francis Judge');
+      assert.equal(saving.interestRate, 0.1);
+      assert.equal(saving.balance(), 0);
+    });
+
+    it('Should create transactions base on the interest rate and balance. Includes charges only.', () => {
+      let saving = new SavingsAccount('321456987', 'Francis Judge', 0.1);
+      assert.equal(saving.accountNumber, '321456987');
+      assert.equal(saving.owner, 'Francis Judge');
+      assert.equal(saving.interestRate, 0.1);
+      assert.equal(saving.balance(), 0);
+      saving.deposit(1000);
+      saving.accrueInterest();
+      assert.equal(saving.balance(), 1100);
+    });
+
+    it('Should create transactions base on the interest rate and balance. Includes deposits and charges.', () => {
+      let saving = new SavingsAccount('321456987', 'Francis Judge', 0.1);
+      saving.deposit(1000);
+      saving.charge('ATM', 300);
+      saving.accrueInterest();
+      assert.equal(saving.balance(), 770);
     });
   });
 }
